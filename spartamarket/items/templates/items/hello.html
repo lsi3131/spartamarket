@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hello, {{ name }}</h1>
+    <p>모든 태그: {{ tags.|join:', ' }}</p>
+    <p>대표 태그: {{ tags.0}} (글자수 : {{ tags.0|length }})</p>
+    <p>최근 독서: {{ books.today}}</p>
+    <p>읽은 도서</p>
+    {% for book in books.items %}
+        <li>{{book.0}} - {{book.1}} </li>
+    {% endfor %}
+{% endblock content %}

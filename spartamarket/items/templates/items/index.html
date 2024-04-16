@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<h1>index page</h1>
+
+<img src="{% static "items/teddy-bear.png" %}" alt="">
+
+<p>My first Django project is working!</p>
+<ul>
+  <li><a href="{% url 'accounts:login' %}">Login</a></li>
+  <li><a href="{% url 'items:hello' %}">Hello</a></li>
+  <li><a href="{% url 'items:items' %}">Article page</a></li>
+  <li><a href="{% url 'users:users' %}">Users</a></li>
+  <li><a href="{% url 'items:throw' %}">Throw</a></li>
+  {% if request.user.is_authenticated %}
+  <li><a href="{% url 'users:profile' request.user.username %}">Profile</a></li>
+  {% endif%}
+</ul>
+
+{% endblock content %}

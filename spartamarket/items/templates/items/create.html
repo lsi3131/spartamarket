@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block content %}
+<h1>New Article</h1>
+
+<form action="{% url 'items:create' %}" method="POST" enctype="multipart/form-data">
+  {% csrf_token %} 
+  {{ form.as_p }}
+  <button type="submit">저장</button>
+</form>
+{% endblock content %}
