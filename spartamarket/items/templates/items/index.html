@@ -9,20 +9,27 @@
     </div>
 
     <div class="row row-cols-1 row-cols-md-4 g-4 mx-auto w-75 pb-5">
-    {% for item in item_list %}
+    {% for item_context in item_context_list %}
         <div class="col">
             <div class="card h-100">
-                {% if item.url %}
-                    <img src="{{ item.url }}" class="card-img-top" alt="...">
+                {% if item_context.url %}
+                    <img src="{{ item_context.url }}" class="card-img-top" alt="...">
                 {% else %}
-                    <img src="https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/webjong/ive.jpg" class="card-img-top" alt="...">
+                    <img src="{% static "sparta.png" %}"
+                         class="card-img-top" alt="...">
                 {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title"><a href="{% url 'items:item_detail' item.id %}">{{ item.title }}</a></h5>
+                    <h5 class="card-title"><a
+                            href="{% url 'items:item_detail' item_context.item.id %}">{{ item_context.item.title }}</a>
+                    </h5>
                     <div class="horizontal">
-                        <p>{{ item.user }}</p>
-                        <p>조회수 : {{ item.click_count }}</p>
+                        <p>{{ item_context.item.user }}</p>
                     </div>
+                    <div class="horizontal">
+                        <p>조회수 : {{ item_context.item.click_count }}</p>
+                        <p>좋아요 : {{ item_context.like_count }}</p>
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -13,11 +13,9 @@ def index(request: HttpRequest):
     item_context_list = []
     for item in item_list:
         item_context = {
-            'id': item.id,
-            'title': item.title,
-            'user': item.user.username,
+            'item': item,
             'url': '',
-            'click_count': item.click_count,
+            'like_count': item.like_users.count(),
         }
         if item.item_images.exists():
             item_context['url'] = item.item_images.all()[0].filepath.url
@@ -25,7 +23,7 @@ def index(request: HttpRequest):
         item_context_list.append(item_context)
 
     context = {
-        'item_list': item_context_list
+        'item_context_list': item_context_list
     }
     return render(request, 'items/index.html', context)
 
