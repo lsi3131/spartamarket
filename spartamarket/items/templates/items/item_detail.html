@@ -14,21 +14,17 @@
             {% endif %}
         </div>
         <div>
-            <form action="{% url "accounts:follow" user.id %}" method="POST">
-                {% csrf_token %}
-                {% if request.user in user.followers.all %}
-                    <form action="{% url 'items:like' item.id %}" method="post">
-                        {% csrf_token %}
-                        <input class="btn btn-primary" type="submit" value="안좋아요">
-                    </form>
-                {% else %}
-                    <form action="{% url 'items:like' item.id %}" method="POST">
-                        {% csrf_token %}
-                        <input class="btn btn-primary" type="submit" value="좋아요">
-                    </form>
-                {% endif %}
-            </form>
-
+            {% if item.is_like_on %}
+                <form action="{% url 'items:like' item.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="좋아요 취소">
+                </form>
+            {% else %}
+                <form action="{% url 'items:like' item.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="좋아요">
+                </form>
+            {% endif %}
         </div>
     </div>
     <hr>
@@ -40,7 +36,11 @@
     {% endif %}
 
     <div class="d-flex justify-content-start">
-        <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+        {% if request.user.image %}
+            <img class="detail-user-image" src="{{ request.user.image.url }}" alt=""/>
+        {% else %}
+            <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+        {% endif %}
 
         <div class="container">
             <h3>{{ item.user }}</h3>
@@ -51,9 +51,6 @@
         <div class="detail_title">
             <h3>{{ item.title }}</h3>
         </div>
-        <div class="detail-category">
-            <h5>스포츠, 레저 / 7일 전</h5>
-        </div>
 
         <div class="detail-price">
             <h3>{{ item.price }}</h3>
@@ -63,8 +60,9 @@
             {{ item.content | linebreaksbr }}
         </div>
 
+        <hr>
         <div class="detail-category">
-            <h5>채팅 {{ item.like }}, 조회 {{ item.item.click_count }}</h5>
+            <h5>좋아요 {{ item.like }}, 조회 {{ item.item.click_count }}</h5>
         </div>
 
     </div>
