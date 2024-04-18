@@ -1,23 +1,18 @@
 import os.path
 
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import *
 from .models import *
 from .forms import ArticleForm, CommentForm
-import json
-import hashlib
 from datetime import datetime
+from spartamarket.util import *
+
+import json
 
 
 # from django.http import get
-def sha512_hash(text):
-    encoded_text = text.encode('utf-8')
-    sha512 = hashlib.sha512()
-    sha512.update(encoded_text)
-    hashed_text = sha512.hexdigest()
-    return hashed_text
 
 
 def index(request: HttpRequest):
@@ -143,10 +138,6 @@ def do_register(request: HttpRequest):
         return JsonResponse({'status': 'error', 'message': 'No file uploaded or invalid request'})
 
 
-def like(request: HttpRequest, id):
-    print('like')
-    return redirect("items:item_detail", id=id)
-
 @require_POST
 def delete(request: HttpRequest, id):
     item = get_object_or_404(Item, id=id)
@@ -233,25 +224,6 @@ def delete_comment(request: HttpRequest, pk):
     return redirect("items:article_detail", article_id)
 
 
-# @login_required
-# @require_http_methods(['GET', 'POST'])
-# def update(request: HttpRequest, pk):
-#     article = Article.objects.get(pk=pk)
-#     if request.method == 'POST':
-#         form = ArticleForm(request.POST, instance=article)
-#         if form.is_valid():
-#             article = form.save()
-#             return redirect('items:article_detail', article.pk)
-#     else:
-#         form = ArticleForm(instance=article)
-#
-#     context = {
-#         'form': form,
-#         'article': article,
-#     }
-#     return render(request, 'items/update.html', context)
-
-
 @require_POST
 def comment_create(request: HttpRequest, pk):
     print('test')
@@ -264,7 +236,7 @@ def comment_create(request: HttpRequest, pk):
     return redirect("items:article_detail", article.pk)
 
 
-# @require_POST
+@require_POST
 def like(request: HttpRequest, pk):
     if request.user.is_authenticated:
         article = get_object_or_404(Article, pk=pk)

@@ -6,19 +6,24 @@
         내 정보
     </h3>
     <div class="margin_bottom">
+        {% csrf_token %}
         <div class="custom_row">
             <div class="custom_row_key">프로필 사진</div>
             <div class="custom_row_value">
                 <form class="horizontal" method="post" enctype="multipart/form-data">
                     <!-- 이미지 파일 데이터에 알맞는 enctype 설정 -->
-                    <div class="addImage" id="image-show">
+                    <div class="addImage" id="image-profile">
                         {% if request.user.image %}
-                            <img class="profile-user-image" src="{% static "images/default_user.png" %}" alt="">
+                            <div>
+                                <img class="profile-user-image" src="{{ request.user.image.url }}" alt="">
+                            </div>
                         {% else %}
-                            <img class="profile-user-image" src="{% static "images/default_user.png" %}" alt="">
+                            <div>
+                                <img class="profile-user-image" src="{% static "images/default_user.png" %}" alt="">
+                            </div>
                         {% endif %}
                     </div>
-                    <input type="file" accept="image/*" onchange="loadFile(this)">
+                    <input type="file" accept="image/*" onchange="addImage(event)">
                 </form>
             </div>
         </div>
@@ -50,8 +55,7 @@
         <div class="custom_row">
             <div class="custom_row_key">자기 소개</div>
             <div class="custom_row_value">
-                <textarea class="changeValueText" disabled>{{ request.user.comment }}</textarea>
-                <button id="commChBtn" class="btn btn-sm btn-theme-color" onclick="createTextForm()">수정하기</button>
+                <textarea name="content" class="changeValueText">{{ request.user.comment }}</textarea>
             </div>
         </div>
         <div class="custom_row">
@@ -63,12 +67,10 @@
 
     <!-- 수정된 버튼과 모달 코드 -->
     <div class="button_area">
-        <button type="button" class="buttonGreen margin_right " data-bs-toggle="modal" data-bs-target="#passwordModal"
-                data-action="update">
+        <button type="button" class="buttonGreen margin_right" onclick="updateAccount()">
             정보 수정
         </button>
-        <button type="button" class="buttonDanger" data-bs-toggle="modal" data-bs-target="#passwordModal"
-                data-action="delete">
+        <button type="button" class="buttonDanger" onclick="deleteAccount()">
             계정 삭제
         </button>
     </div>
@@ -97,6 +99,57 @@
     </div>
 
     <script>
+        let selectedFile = null
+        const csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        const contentInput = document.querySelector('textarea[name="content"]');
+
+        function addImage(event) {
+            // 파일 선택 다이얼로그에서 파일을 선택했을 때 이벤트 처리
+            selectedFile = event.target.files[0];
+            console.log(selectedFile)
+
+            var divImage = document.getElementById('image-profile');
+
+            imgSrc = URL.createObjectURL(selectedFile);
+
+            var htmlString = `
+            <img src="${imgSrc}" class="profile-user-image" alt="...">
+`;
+            var divInnerImage = document.createElement('div');
+            divInnerImage.innerHTML = htmlString;
+
+            divImage.innerHTML = ''
+            divImage.appendChild(divInnerImage)
+        }
+
+        function updateAccount() {
+            let formData = new FormData();
+            const content = contentInput.value.trim()
+            const csrfToken = csrfTokenInput.value.trim()
+
+            formData.append('file', selectedFile)
+            formData.append('content', content)
+
+            console.log('content')
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', '/accounts/update/', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    console.log('업로드 성공');
+                    window.location = '/items/index/'
+                } else {
+                    console.error('파일 업로드 실패');
+                }
+            }
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            xhr.send(formData);
+        }
+
+        function deleteAccount() {
+            console.log('delete')
+        }
+
+
         function createPassForm() {
             var btn = document.querySelector("#passChBtn");
             var passwordForm = document.querySelector(".passwordForm");
@@ -133,137 +186,5 @@
             }
         }
 
-        document.addEventListener("keydown", function (event) {
-            const passBtn = document.querySelector("#passChBtn");
-            const commBtn = document.querySelector("#commChBtn");
-
-            // 패스워드 수정 버튼이 클릭된 상태에서 Enter 키가 눌렸을 때
-            if (event.key === "Enter" && passBtn.innerHTML === "수정완료") {
-                createPassForm();
-            }
-
-            // 자기 소개 수정 버튼이 클릭된 상태에서 Enter 키가 눌렸을 때
-            if (event.key === "Enter" && commBtn.innerHTML === "수정완료") {
-                createTextForm();
-            }
-        });
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const passwordModal = document.getElementById('passwordModal');
-            const modalOpen = false;
-            passwordModal.addEventListener('hide.bs.modal', function (event) {
-                const modalOpen = false;
-            });
-            passwordModal.addEventListener('show.bs.modal', function (event) {
-                const modalOpen = true;
-                const button = event.relatedTarget;
-                const action = button.getAttribute('data-action');
-                const form = document.getElementById('passwordForm');
-                const url = '/acc/' + action + "User";
-
-                // 확인 버튼 클릭 시 동작 설정
-                const confirmButton = document.getElementById('confirmButton');
-                confirmButton.addEventListener('click', handleConfirmation);
-
-                // Enter 키 입력 시 동작 설정
-                passwordModal.addEventListener('keypress', function (e) {
-                    if (modalOpen && e.key === 'Enter') {
-                        handleConfirmation();
-                    }
-                });
-
-                function handleConfirmation() {
-
-                    const passwordInput = document.getElementById('passwordInput').value.trim();
-                    // 패스워드 체크
-                    console.log(passwordInput);
-
-                    fetch('/acc/checkPassword', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            password: passwordInput
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.isValid) {
-                                if (action === "update") {
-                                    const form = document.createElement('form');
-                                    form.setAttribute('method', 'POST');
-                                    form.setAttribute('enctype', 'multipart/form-data');
-                                    form.setAttribute('action', url);
-
-                                    const fileInput = document.querySelector('input[type="file"]');
-                                    const profilePic = fileInput.files[0];
-                                    document.querySelector('.changePass').removeAttribute('disabled');
-                                    const newPassword = document.querySelector('.changePass').value.trim();
-                                    document.querySelector('.changeValueText').removeAttribute('disabled');
-                                    const newComment = document.querySelector('.changeValueText').value.trim();
-
-                                    // 이미지 파일 추가
-                                    if (profilePic) {
-                                        const profilePicInput = document.createElement('input');
-                                        profilePicInput.setAttribute('type', 'file');
-                                        profilePicInput.setAttribute('name', 'changePic');
-                                        profilePicInput.files = fileInput.files;
-                                        form.appendChild(profilePicInput);
-                                    }
-                                    // 패스워드 추가
-                                    const passwordInput = document.createElement('input');
-                                    passwordInput.setAttribute('type', 'text');
-                                    passwordInput.setAttribute('name', 'changePass');
-                                    passwordInput.value = newPassword;
-                                    form.appendChild(passwordInput);
-
-                                    // 자기소개글 추가
-                                    const commentInput = document.createElement('input');
-                                    commentInput.setAttribute('type', 'text');
-                                    commentInput.setAttribute('name', 'changeComment');
-                                    alert(newComment);
-                                    commentInput.value = newComment;
-                                    form.appendChild(commentInput);
-
-                                    // form을 body에 추가하고 전송
-                                    document.body.appendChild(form);
-                                    form.submit();
-                                } else if (action == "delete") {
-                                    fetch(url, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                    })
-                                        .then(response => {
-                                            if (!response.ok) {
-                                                throw new Error('Network response was not ok');
-                                            }
-                                            return response.json(); // 응답 데이터를 JSON 형식으로 파싱하여 반환
-                                        })
-                                        .then(data => {
-                                            window.location.href = '/acc/index';
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                        });
-                                }
-                            } else {
-                                location.reload();
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                }
-
-                // 모달이 열릴 때 패스워드 입력란에 포커스 주기
-                setTimeout(function () {
-                    const passwordInput = document.getElementById('passwordInput');
-                    passwordInput.focus();
-                }, 500);
-
-            });
-        });
     </script>
 {% endblock %}

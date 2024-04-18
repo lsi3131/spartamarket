@@ -8,10 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 
 from .models import *
+from spartamarket.util import *
 
-from .forms import CustomUserChangeForm, CustomUserCreationForm
 import json
-import hashlib
 
 
 def login(request: HttpRequest):
@@ -96,10 +95,19 @@ def delete(request: HttpRequest):
     return redirect("items:index")
 
 
-@require_http_methods(["GET", "POST"])
-def update(request):
-    print('update')
-    return render(request, "accounts/update.html")
+@require_POST
+def update(request: HttpRequest):
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        file_path_list = upload_to_file(request, 'upload/')
+        user = get_object_or_404(User, id=request.user.id)
+        if file_path_list:
+            user.image = file_path_list[0]
+        user.comment = content
+
+        user.save()
+
+    return JsonResponse({'status': 'success'})
 
 
 @login_required
@@ -118,6 +126,4 @@ def change_password(request):
 
 
 def profile(request: HttpRequest):
-    date_str = request.user.date_joined.strftime("%Y-%m-%d %H:%M")
-    print(date_str)
     return render(request, 'accounts/profile.html')

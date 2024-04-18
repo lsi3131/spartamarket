@@ -105,7 +105,6 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
                     if (data['isValid']) {
                         var formData = new FormData();
                         for (var i = 0; i < selectedFileList.length; ++i) {
@@ -128,8 +127,6 @@
                         };
                         xhr.setRequestHeader('X-CSRFToken', csrfToken);
                         xhr.send(formData);
-                    } else {
-                        console.log('invalid')
                     }
                 })
                 .catch(error => console.error('Error:', error));
