@@ -3,11 +3,10 @@
         <div class="horizontal d-flex justify-content-start">
             <a class="btn btn-primary" href="{% url 'items:index' %}">목록으로</a>
             {% if request.user.is_authenticated %}
-                <form action="{% url 'items:update' item.id %}" method="post">
-                    {% csrf_token %}
+                <form action="{% url 'items:update' item.id %}" method="GET">
                     <input class="btn btn-primary" type="submit" value="수정하기">
                 </form>
-                <form action="{% url 'items:delete' item.id %}" method="post">
+                <form action="{% url 'items:delete' item.id %}" method="POST">
                     {% csrf_token %}
                     <input class="btn btn-primary" type="submit" value="삭제하기">
                 </form>

@@ -33,7 +33,7 @@ def item_detail(request: HttpRequest, id):
     item.click_count += 1
     item.save()
 
-    is_like_on = item.like_users.filter(id=request.user.pk).exists()
+    is_like_on = item.like_users.filter(id=request.user.id).exists()
 
     item_context = {
         'item': item,
@@ -55,17 +55,33 @@ def item_detail(request: HttpRequest, id):
 
 
 def register(request: HttpRequest):
-    if request.method == 'POST' and request.FILES['file']:
-        item = Item()
-        item.content = request.POST.get('content')
-        item.title = request.POST.get('title')
-        item.price = request.POST.get('price')
-        item.user = request.user
+    return render(request, 'items/register.html')
 
-        item.save()
-        return redirect("items:index")
-    else:
-        return render(request, 'items/register.html')
+
+@require_POST
+def delete(request: HttpRequest, id):
+    item = get_object_or_404(Item, id=id)
+    item.delete()
+
+    print(f'delete. id = {id}')
+    return redirect("items:index")
+
+
+@require_GET
+def update(request: HttpRequest, id):
+    item = get_object_or_404(Item, id=id)
+    context = {
+        'id': item.id,
+        'title': item.title,
+        'price': item.price,
+        'content': item.content,
+        'images': []
+    }
+    if item.item_images:
+        for image in item.item_images.all():
+            context['images'].append(image.filepath.url)
+
+    return render(request, 'items/register.html', context)
 
 
 @require_POST
@@ -85,7 +101,12 @@ def check_register(request: HttpRequest):
 @require_POST
 def do_register(request: HttpRequest):
     if request.method == 'POST':
-        item = Item()
+        id = request.POST.get('id')
+        if id is not None:
+            item = get_object_or_404(Item, id=id)
+        else:
+            item = Item()
+
         item.content = request.POST.get('content')
         item.title = request.POST.get('title')
         item.price = request.POST.get('price')
@@ -107,26 +128,11 @@ def do_register(request: HttpRequest):
 
 
 @require_POST
-def delete(request: HttpRequest, id):
-    item = get_object_or_404(Item, id=id)
-    item.delete()
-
-    print(f'delete. id = {id}')
-    return redirect("items:index")
-
-
-@require_POST
-def update(request: HttpRequest, id):
-    print(f'update. id = {id}')
-    return redirect("items:index")
-
-
-@require_POST
 def like(request: HttpRequest, id):
     if request.user.is_authenticated:
         item = get_object_or_404(Item, id=id)
 
-        if item.like_users.filter(id=request.user.pk).exists():
+        if item.like_users.filter(id=request.user.id).exists():
             print('remove like')
             item.like_users.remove(request.user)
         else:
