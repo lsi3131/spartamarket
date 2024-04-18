@@ -1,10 +1,123 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-    <h1>회원가입</h1>
-    <form action="{% url "accounts:signup" %}" method="POST">
+    <style scoped>
+        .signup-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #signupForm {
+            flex-direction: column;
+        }
+
+        .customInput {
+            width: 300px;
+            margin-top: -5px;
+        }
+
+        .file-input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #imagePreview {
+            width: 100px;
+            height: 100px;
+            margin-left: -100px;
+            display: none;
+        }
+
+        .profile-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: larger;
+            margin-bottom: 12px;
+        }
+    </style>
+
+    <div class="signup-center customLogo loginLogoBox textOrange">
+        <img class="navbar-image-logo marginRight16" src="{% static "kkyul.png" %}" alt="🍊">
+        <span>회원가입</span>
+        <img class="navbar-image-logo marginLeft16" src="{% static "kkyul.png" %}" alt="🍊">
+    </div>
+
+    <form id="signupForm" class="signup-center" method="post" enctype="multipart/form-data"
+          action="{% url 'accounts:signup' %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">회원가입</button>
+        <span class="regNameState"></span><br>
+        <input type="text" class="customInput" name="regName" placeholder="아이디를 입력해주세요"><br>
+        <input type="password" class="customInput" name="regPass" placeholder="패스워드를 입력해 주세요"><br>
+        <input type="password" class="customInput" name="chkPass" placeholder="패스워드를 다시 입력해 주세요"><br>
+        <span class="regMailState"></span><br>
+        <input type="email" name="regEmail" class="customInput" placeholder="이메일을 형식에 맞춰 작성해 주세요"><br>
+        <div class="file-input-container">
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <span class="profile-text textOrange">프로필 사진</span>
+                <div style="display: flex; flex-direction: row;">
+                    <input type="file" name="regImage" id="regPic" onchange="previewFile()">
+                    <img id="imagePreview">
+                </div>
+            </div>
+        </div>
+        <textarea name="regComment" class="customInput" style="margin-top: 40px;" placeholder="소개글을 작성해 주세요."></textarea>
+        <button type="button" style="width: 300px;" class="btn btn-primary marginTop16" onclick="signupCheck()">회원가입
+        </button>
     </form>
+
+    <script>
+        let usernameBool = false;
+        const usernameInput = document.querySelector('input[name="regName"]');
+        const usernameState = document.querySelector('.regNameState');
+        const userpassInput = document.querySelector('input[name="regPass"]');
+        const userCheckpassInput = document.querySelector('input[name="chkPass"]');
+        const csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+
+        usernameInput.addEventListener('keyup', function () {
+            const username = usernameInput.value.trim();
+            const csrfToken = csrfTokenInput.value.trim();
+            if (username.length > 4) {
+                fetch('/accounts/check_name_dup/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({username: username})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        if (data.isDuplicate) {
+                            usernameState.innerHTML = "사용중인 아이디입니다.";
+                            usernameBool = false;
+                        } else {
+                            usernameState.innerHTML = "사용가능한 아이디입니다.";
+                            usernameBool = true;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                usernameState.innerHTML = "아이디는 5자리 이상으로 설정해주세요.";
+                usernameBool = false;
+            }
+        });
+
+        function signupCheck() {
+            const userPass = userpassInput.value.trim();
+            const userChkPass = userCheckpassInput.value.trim();
+            if (!usernameBool) {
+                alert("입력하신 아이디를 확인해주세요");
+            } else if (userPass !== userChkPass) {
+                alert("패스워드가 서로 일치하지 않습니다.");
+            } else {
+                document.getElementById("signupForm").submit();
+            }
+        }
+    </script>
 {% endblock %}

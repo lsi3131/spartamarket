@@ -3,20 +3,12 @@ from . import views
 
 app_name = 'items'
 urlpatterns = [
-    path('', views.items, name='items'),
-    path('hello/', views.hello, name='hello'),
-    path('data-throw/', views.data_throw, name='throw'),
-    path('data-catch/', views.data_catch, name='catch'),
-    path('<int:pk>/', views.article_detail, name='article_detail'),
-    #
     path('index/', views.index, name='index'),
-    #
-    path('<int:pk>/delete/', views.delete, name='delete'),
-    path("<int:pk>/update/", views.update, name="update"),
-    path('create/', views.create, name='create'),
-
-    path("<int:pk>/comments/", views.comment_create, name="comment_create"),
-    path("<int:pk>/delete_comment/", views.delete_comment, name="delete_comment"),
-
-    path("<int:pk>/like/", views.like, name="like"),
+    path('item_detail/<int:id>/', views.item_detail, name='item_detail'),
+    path('register/', views.register, name='register'),
+    path('check_register/', views.check_register, name='check_register'),
+    path('do_register/', views.do_register, name='do_register'),
+    path("delete/<int:id>/", views.delete, name="delete"),
+    path("update/<int:id>/", views.update, name="update"),
+    path("like/<int:id>/", views.like, name="like"),
 ]

@@ -1,18 +1,31 @@
-{% extends "base.html" %} {% load static %} {% block content %}
-<h1>index page</h1>
+{% extends "base.html" %}
+{% load static %}
 
-<img src="{% static "items/teddy-bear.png" %}" alt="">
+{% block content %}
+    <div class="horizontal">
+        <form action="{% url 'items:register' %}" method="GET">
+            <input type="submit" class="btn btn-primary" value="물건 등록">
+        </form>
+    </div>
 
-<p>My first Django project is working!</p>
-<ul>
-  <li><a href="{% url 'accounts:login' %}">Login</a></li>
-  <li><a href="{% url 'items:hello' %}">Hello</a></li>
-  <li><a href="{% url 'items:items' %}">Article page</a></li>
-  <li><a href="{% url 'users:users' %}">Users</a></li>
-  <li><a href="{% url 'items:throw' %}">Throw</a></li>
-  {% if request.user.is_authenticated %}
-  <li><a href="{% url 'users:profile' request.user.username %}">Profile</a></li>
-  {% endif%}
-</ul>
+    <div class="row row-cols-1 row-cols-md-4 g-4 mx-auto w-75 pb-5">
+    {% for item in item_list %}
+        <div class="col">
+            <div class="card h-100">
+                {% if item.url %}
+                    <img src="{{ item.url }}" class="card-img-top" alt="...">
+                {% else %}
+                    <img src="https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/webjong/ive.jpg" class="card-img-top" alt="...">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{% url 'items:item_detail' item.id %}">{{ item.title }}</a></h5>
+                    <div class="horizontal">
+                        <p>{{ item.user }}</p>
+                        <p>조회수 : {{ item.click_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 
 {% endblock content %}

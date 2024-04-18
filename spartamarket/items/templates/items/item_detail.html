@@ -1,0 +1,72 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+    <div class="horizontal">
+        <div class="horizontal d-flex justify-content-start">
+            <a class="btn btn-primary" href="{% url 'items:index' %}">목록으로</a>
+            {% if request.user.is_authenticated %}
+                <form action="{% url 'items:update' item.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="수정하기">
+                </form>
+                <form action="{% url 'items:delete' item.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="삭제하기">
+                </form>
+            {% endif %}
+        </div>
+        <div>
+            <form action="{% url "accounts:follow" user.id %}" method="POST">
+                {% csrf_token %}
+                {% if request.user in user.followers.all %}
+                    <form action="{% url 'items:like' item.id %}" method="post">
+                        {% csrf_token %}
+                        <input class="btn btn-primary" type="submit" value="안좋아요">
+                    </form>
+                {% else %}
+                    <form action="{% url 'items:like' item.id %}" method="POST">
+                        {% csrf_token %}
+                        <input class="btn btn-primary" type="submit" value="좋아요">
+                    </form>
+                {% endif %}
+            </form>
+
+        </div>
+    </div>
+    <hr>
+    {% if url %}
+        <div class="col">
+            <img src="{{ url }}" alt="..."/>
+        </div>
+        <hr>
+    {% endif %}
+
+    <div class="d-flex justify-content-start">
+        <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+
+        <div class="container">
+            <h3>{{ item.user }}</h3>
+        </div>
+    </div>
+    <hr>
+    <div class="detail-content-container">
+        <div class="detail_title">
+            <h3>{{ item.title }}</h3>
+        </div>
+        <div class="detail-category">
+            <h5>스포츠, 레저 / 7일 전</h5>
+        </div>
+
+        <div class="detail-price">
+            <h3>{{ item.price }}</h3>
+        </div>
+
+        <div class="detail-content">
+            {{ item.content | linebreaksbr }}
+        </div>
+
+        <div class="detail-category">
+            <h5>채팅 {{ item.like }}, 조회 {{ item.item.click_count }}</h5>
+        </div>
+
+    </div>
+
+{% endblock content %}

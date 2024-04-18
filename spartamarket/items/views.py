@@ -1,23 +1,165 @@
-from django.http import HttpResponse, HttpRequest
+import os.path
+
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import *
-from .models import Article, Comment
+from .models import *
 from .forms import ArticleForm, CommentForm
+import json
+import hashlib
+from datetime import datetime
+
+
 # from django.http import get
+def sha512_hash(text):
+    encoded_text = text.encode('utf-8')
+    sha512 = hashlib.sha512()
+    sha512.update(encoded_text)
+    hashed_text = sha512.hexdigest()
+    return hashed_text
 
 
-def index(request):
-    return render(request, 'items/index.html')
+def index(request: HttpRequest):
+    item_list = Item.objects.all()
 
+    item_context_list = []
+    for item in item_list:
+        item_context = {
+            'id': item.id,
+            'title': item.title,
+            'user': item.user.username,
+            'url': '',
+            'click_count': item.click_count,
+        }
+        if item.item_images.exists():
+            item_context['url'] = item.item_images.all()[0].filepath.url
 
-def items(request):
-    article_datas = Article.objects.all().order_by('-id')
+        item_context_list.append(item_context)
 
     context = {
-        'items': article_datas
+        'item_list': item_context_list
     }
-    return render(request, 'items/items.html', context)
+    return render(request, 'items/index.html', context)
+
+
+def item_detail(request: HttpRequest, id):
+    item = get_object_or_404(Item, id=id)
+    item.click_count += 1
+    item.save()
+
+    item_context = {
+        'item': item,
+        'id': item.id,
+        'title': item.title,
+        'user': item.user.username,
+        'content': item.content,
+        'like': 0,
+        'url': '',
+    }
+    if item.item_images.exists():
+        item_context['url'] = item.item_images.all()[0].filepath.url
+
+    context = {
+        'item': item_context
+    }
+    return render(request, 'items/item_detail.html', context)
+
+
+def register(request: HttpRequest):
+    if request.method == 'POST' and request.FILES['file']:
+        item = Item()
+        item.content = request.POST.get('content')
+        item.title = request.POST.get('title')
+        item.price = request.POST.get('price')
+        item.user = request.user
+
+        print(item)
+
+        # item.save()
+        return redirect("items:index")
+    else:
+        print('get')
+        return render(request, 'items/register.html')
+
+
+@require_POST
+def check_register(request: HttpRequest):
+    data = json.loads(request.body)
+    print(f'check register={data}')
+
+    context = {
+        "isValid": True,
+        'title': data['title'],
+        'price': data['price'],
+        'content': data['content'],
+    }
+    return JsonResponse(context)
+
+
+def upload_to_file(request: HttpRequest, dirname):
+    file_path_list = []
+    upload_dir_path = os.path.join('media', dirname)
+    if not os.path.exists(upload_dir_path):
+        os.mkdir(upload_dir_path)
+
+    for uploaded_file in request.FILES.values():
+        ext = uploaded_file.name.split(".")[-1]
+        hashed_filename = sha512_hash(
+            f"{request.user.username}image_file{datetime.now()}") + f".{ext}"
+
+        file_path = upload_dir_path + hashed_filename
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        file_path_list.append(dirname + hashed_filename)
+
+    return file_path_list
+
+
+@require_POST
+def do_register(request: HttpRequest):
+    if request.method == 'POST':
+        item = Item()
+        item.content = request.POST.get('content')
+        item.title = request.POST.get('title')
+        item.price = request.POST.get('price')
+        item.user = request.user
+
+        item.save()
+
+        file_path_list = upload_to_file(request, 'upload/')
+
+        for file_path in file_path_list:
+            image = Image()
+            image.filepath = file_path
+            image.item = item
+            image.save()
+            print(f'image path = {image.filepath}')
+
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'No file uploaded or invalid request'})
+
+
+def like(request: HttpRequest, id):
+    print('like')
+    return redirect("items:item_detail", id=id)
+
+@require_POST
+def delete(request: HttpRequest, id):
+    item = get_object_or_404(Item, id=id)
+    item.delete()
+
+    print(f'delete. id = {id}')
+    return redirect("items:index")
+
+
+@require_POST
+def update(request: HttpRequest, id):
+    print(f'update. id = {id}')
+    return redirect("items:index")
 
 
 def hello(request):
@@ -83,14 +225,6 @@ def article_detail(request, pk):
 
 
 @require_POST
-def delete(request: HttpRequest, pk):
-    if request.user.is_authenticated:
-        article = get_object_or_404(Article, pk=pk)
-        article.delete()
-    return redirect("items:items")
-
-
-@require_POST
 def delete_comment(request: HttpRequest, pk):
     article_id = request.POST.get('article_id')
     print(article_id)
@@ -99,23 +233,23 @@ def delete_comment(request: HttpRequest, pk):
     return redirect("items:article_detail", article_id)
 
 
-@login_required
-@require_http_methods(['GET', 'POST'])
-def update(request: HttpRequest, pk):
-    article = Article.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = ArticleForm(request.POST, instance=article)
-        if form.is_valid():
-            article = form.save()
-            return redirect('items:article_detail', article.pk)
-    else:
-        form = ArticleForm(instance=article)
-
-    context = {
-        'form': form,
-        'article': article,
-    }
-    return render(request, 'items/update.html', context)
+# @login_required
+# @require_http_methods(['GET', 'POST'])
+# def update(request: HttpRequest, pk):
+#     article = Article.objects.get(pk=pk)
+#     if request.method == 'POST':
+#         form = ArticleForm(request.POST, instance=article)
+#         if form.is_valid():
+#             article = form.save()
+#             return redirect('items:article_detail', article.pk)
+#     else:
+#         form = ArticleForm(instance=article)
+#
+#     context = {
+#         'form': form,
+#         'article': article,
+#     }
+#     return render(request, 'items/update.html', context)
 
 
 @require_POST
