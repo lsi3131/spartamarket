@@ -1,6 +1,7 @@
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.http import *
+from django.db.models import Count
 from .models import *
 from spartamarket.util import *
 
@@ -8,7 +9,16 @@ import json
 
 
 def index(request: HttpRequest):
-    item_list = Item.objects.all()
+    sort = request.GET.get('sort')
+    if not sort:
+        sort = 'recent'
+
+    if sort == 'recent':
+        item_list = Item.objects.all().order_by('-created_at')
+    elif sort == 'click':
+        item_list = Item.objects.all().order_by('-click_count')
+    elif sort == 'like':
+        item_list = Item.objects.annotate(like_count=Count('like_users')).order_by('-like_count')
 
     item_context_list = []
     for item in item_list:
@@ -23,7 +33,8 @@ def index(request: HttpRequest):
         item_context_list.append(item_context)
 
     context = {
-        'item_context_list': item_context_list
+        'item_context_list': item_context_list,
+        'sort': sort
     }
     return render(request, 'items/index.html', context)
 
