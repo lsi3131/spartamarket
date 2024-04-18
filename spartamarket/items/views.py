@@ -9,16 +9,32 @@ import json
 
 
 def index(request: HttpRequest):
+    category = request.GET.get('category')
+    keyword = request.GET.get('keyword')
     sort = request.GET.get('sort')
+    if not category:
+        category = 'title'
+
+    if not keyword:
+        keyword = ''
+
     if not sort:
         sort = 'recent'
 
+    item_list = None
+    if category == 'title':
+        item_list = Item.objects.filter(title__icontains=keyword)
+    elif category == 'username':
+        item_list = Item.objects.filter(user__username__icontains=keyword)
+    elif category == 'content':
+        item_list = Item.objects.filter(content__icontains=keyword)
+
     if sort == 'recent':
-        item_list = Item.objects.all().order_by('-created_at')
+        item_list = item_list.order_by('-created_at')
     elif sort == 'click':
-        item_list = Item.objects.all().order_by('-click_count')
+        item_list = item_list.all().order_by('-click_count')
     elif sort == 'like':
-        item_list = Item.objects.annotate(like_count=Count('like_users')).order_by('-like_count')
+        item_list = item_list.annotate(like_count=Count('like_users')).order_by('-like_count')
 
     item_context_list = []
     for item in item_list:
