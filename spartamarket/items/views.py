@@ -42,6 +42,7 @@ def index(request: HttpRequest):
             'item': item,
             'url': '',
             'like_count': item.like_users.count(),
+            'price_comma': "{:,}".format(item.price)
         }
         if item.item_images.exists():
             item_context['url'] = item.item_images.all()[0].filepath.url
