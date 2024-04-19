@@ -1,6 +1,10 @@
 from django.test import TestCase
+
+from spartamarket.settings import *
 from .models import *
 from accounts.models import User
+
+import json
 
 
 # Create your tests here.
@@ -35,3 +39,22 @@ class ItemTestCase(TestCase):
         self.assertEqual(3, tagged_items.count())
         self.assertEqual(2, TaggedItem.objects.filter(item=item1).count())
         self.assertEqual(1, TaggedItem.objects.filter(item=item2).count())
+
+    def test_register_post_json_key_exists(self):
+        invalid_data = {'invalid': 'data'}
+        response = self.client.post('/items/check_register/', invalid_data, content_type='application/json')
+        response_json_data = json.loads(response.content)
+        self.assertEqual(False, response_json_data['isValid'])
+
+        valid_data = {
+            'title': 'title',
+            'price': 10000,
+            'content': 'content'
+        }
+        response = self.client.post('/items/check_register/', valid_data, content_type='application/json')
+        response_json_data = json.loads(response.content)
+        self.assertEqual(True, response_json_data['isValid'])
+
+    def test_settings(self):
+        print(BASE_DIR)
+        print(STATICFILES_DIRS)

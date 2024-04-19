@@ -120,14 +120,23 @@ def update(request: HttpRequest, id):
 @require_POST
 def check_register(request: HttpRequest):
     data = json.loads(request.body)
-    print(f'check register={data}')
 
     context = {
-        "isValid": True,
-        'title': data['title'],
-        'price': data['price'],
-        'content': data['content'],
+        "isValid": False,
+        'title': '',
+        'price': '',
+        'content': '',
     }
+    required_keys = ['title', 'price', 'content']
+
+    if any(key not in data for key in required_keys):
+        return JsonResponse(context)
+
+    context['isValid'] = True
+    context['title'] = data['title']
+    context['price'] = data['price']
+    context['content'] = data['content']
+
     return JsonResponse(context)
 
 

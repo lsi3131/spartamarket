@@ -4,6 +4,7 @@ from django.http import HttpRequest
 import hashlib
 import os
 
+
 def sha512_hash(text):
     encoded_text = text.encode('utf-8')
     sha512 = hashlib.sha512()
