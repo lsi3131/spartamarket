@@ -2,25 +2,23 @@
 {% load static %}
 
 {% block content %}
-    {% for item in items %}
+    {% for item_context in item_context_list %}
         <div class="horizontal">
             <div class="d-flex justify-content-start">
-{#                {% if item.image %}#}
-{#                    <img class="detail-user-image" src="{{ user.image.url }}" alt=""/>#}
-{#                {% else %}#}
-{#                    <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>#}
-{#                {% endif %}#}
-                <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+                {% if item_context.image_url %}
+                    <img class="detail-user-image" src="{{ item_context.image_url }}" alt=""/>
+                {% else %}
+                    <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+                {% endif %}
 
                 <div class="container">
-                    <h3>{{ item.title }}</h3>
+                    <a href="{% url 'items:item_detail' item_context.item.id %}">
+                        <h3>{{ item_context.item.title }}</h3>
+                    </a>
                 </div>
             </div>
             <div>
-                <form action="{% url "accounts:follow" user.id %}" method="POST">
-                    {% csrf_token %}
-                    <p>조회수 : {{ item_context.item.click_count }} ∙ 좋아요 : {{ item_context.like_count }}</p>
-                </form>
+                <p>조회수 : {{ item_context.item.click_count }} ∙ 좋아요 : {{ item_context.like_count }}</p>
             </div>
         </div>
         <hr>

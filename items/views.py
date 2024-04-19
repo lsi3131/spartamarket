@@ -211,4 +211,23 @@ def like_list(request):
 
 
 def register_item_list(request):
-    return render(request, 'items/register_item_list.html')
+    item_register_list = Item.objects.filter(user=request.user)
+
+    item_context_list = []
+    for item in item_register_list:
+        item_context = {
+            'item': item,
+            'image_url': '',
+            'like_count': item.like_users.count(),
+            'price_comma': "{:,}".format(item.price)
+        }
+        if item.item_images.exists():
+            item_context['image_url'] = item.item_images.all()[0].filepath.url
+
+        item_context_list.append(item_context)
+
+    context = {
+        'item_context_list': item_context_list
+    }
+
+    return render(request, 'items/register_item_list.html', context)
