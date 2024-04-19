@@ -3,6 +3,7 @@ SPARTA 내일배움캠프에서 과제로 제작한 프로잭트입니다.
 자유롭게 물건을 등록하고 조회할 수 있습니다.
 
 <br>
+<img width="1703" alt="스크린샷 2024-04-19 오후 3 30 54" src="https://github.com/lsi3131/spartamarket/assets/29705725/de0fc1f7-b47a-4079-b5bc-9fe4ac4dc811">
 
 ## 목차
 - [주요 기능](#주요-기능)
