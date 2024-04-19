@@ -3,13 +3,15 @@
         <div class="horizontal d-flex justify-content-start">
             <a class="btn btn-primary" href="{% url 'items:index' %}">목록으로</a>
             {% if request.user.is_authenticated %}
-                <form action="{% url 'items:update' item.id %}" method="GET">
-                    <input class="btn btn-primary" type="submit" value="수정하기">
-                </form>
-                <form action="{% url 'items:delete' item.id %}" method="POST">
-                    {% csrf_token %}
-                    <input class="btn btn-primary" type="submit" value="삭제하기">
-                </form>
+                {% if request.user.username == item.user %}
+                    <form action="{% url 'items:update' item.id %}" method="GET">
+                        <input class="btn btn-primary" type="submit" value="수정하기">
+                    </form>
+                    <form action="{% url 'items:delete' item.id %}" method="POST">
+                        {% csrf_token %}
+                        <input class="btn btn-primary" type="submit" value="삭제하기">
+                    </form>
+                {% endif %}
             {% endif %}
         </div>
         <div>
@@ -27,12 +29,14 @@
         </div>
     </div>
     <hr>
-    {% if url %}
-        <div class="col">
-            <img src="{{ url }}" alt="..."/>
-        </div>
-        <hr>
-    {% endif %}
+    <div class="row">
+        {% for image in item.images %}
+            <div class="col d-flex justify-content-center">
+                <img class="detail-item-image" src="{{ image }}" alt=""/>
+            </div>
+        {% endfor %}
+    </div>
+    <hr>
 
     <div class="d-flex justify-content-start">
         {% if request.user.image %}
@@ -41,7 +45,7 @@
             <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
         {% endif %}
 
-        <div class="container">
+        <div class="mx-5">
             <h3>{{ item.user }}</h3>
         </div>
     </div>
@@ -61,7 +65,7 @@
 
         <hr>
         <div class="detail-category">
-            <h5>좋아요 {{ item.like }}, 조회 {{ item.item.click_count }}</h5>
+            <span>좋아요 {{ item.like }} ∙ 조회 {{ item.item.click_count }}</span>
         </div>
 
     </div>

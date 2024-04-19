@@ -69,11 +69,12 @@ def item_detail(request: HttpRequest, id):
         'user': item.user.username,
         'content': item.content,
         'like': item.like_users.count(),
-        'url': '',
+        'images': [],
         'is_like_on': is_like_on
     }
     if item.item_images.exists():
-        item_context['url'] = item.item_images.all()[0].filepath.url
+        for image in item.item_images.all():
+            item_context['images'].append(image.filepath.url)
 
     context = {
         'item': item_context
@@ -106,7 +107,11 @@ def update(request: HttpRequest, id):
     }
     if item.item_images:
         for image in item.item_images.all():
-            context['images'].append(image.filepath.url)
+            context['images'].append(
+                {
+                    'id': image.id,
+                    'url': image.filepath.url
+                })
 
     return render(request, 'items/register.html', context)
 
@@ -131,6 +136,9 @@ def do_register(request: HttpRequest):
         id = request.POST.get('id')
         if id is not None:
             item = get_object_or_404(Item, id=id)
+            delete_image_id_list = request.POST.getlist('deleteImageId[]')
+            images = Image.objects.filter(id__in=delete_image_id_list)
+            images.delete()
         else:
             item = Item()
 
