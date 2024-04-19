@@ -178,12 +178,37 @@ def like(request: HttpRequest, id):
         item = get_object_or_404(Item, id=id)
 
         if item.like_users.filter(id=request.user.id).exists():
-            print('remove like')
             item.like_users.remove(request.user)
         else:
-            print('add like')
             item.like_users.add(request.user)
     else:
         return redirect("items:item_detail", id)
 
     return redirect("items:item_detail", id)
+
+
+def like_list(request):
+    item_like_list = request.user.like_items.all()
+
+    item_context_list = []
+    for item in item_like_list:
+        item_context = {
+            'item': item,
+            'image_url': '',
+            'like_count': item.like_users.count(),
+            'price_comma': "{:,}".format(item.price)
+        }
+        if item.item_images.exists():
+            item_context['image_url'] = item.item_images.all()[0].filepath.url
+
+        item_context_list.append(item_context)
+
+    context = {
+        'item_context_list': item_context_list
+    }
+
+    return render(request, 'items/like_list.html', context)
+
+
+def register_item_list(request):
+    return render(request, 'items/register_item_list.html')

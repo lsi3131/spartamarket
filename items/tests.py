@@ -58,3 +58,15 @@ class ItemTestCase(TestCase):
     def test_settings(self):
         print(BASE_DIR)
         print(STATICFILES_DIRS)
+
+    def test_like(self):
+        item1 = Item.objects.create(title='item1', content='content', price=1000, user=self.test_user)
+        item2 = Item.objects.create(title='item2', content='content', price=1000, user=self.test_user)
+
+        item1.like_users.add(self.test_user)
+        item2.like_users.add(self.test_user)
+
+        item1.save()
+        item2.save()
+
+        self.assertEqual(2, self.test_user.like_items.all().count())
