@@ -13,7 +13,7 @@
             flex-direction: column;
         }
 
-        .customInput {
+        .custom-input {
             width: 300px;
             margin-top: -5px;
         }
@@ -31,17 +31,9 @@
             display: none;
         }
 
-        .profile-text {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            font-size: larger;
-            margin-bottom: 12px;
-        }
     </style>
 
-    <div class="signup-center customLogo loginLogoBox textOrange">
+    <div class="signup-center">
         <img class="navbar-image-logo marginRight16" src="{% static "sparta.png" %}" alt="">
         <span>회원가입</span>
         <img class="navbar-image-logo marginLeft16" src="{% static "sparta.png" %}" alt="">
@@ -51,22 +43,13 @@
           action="{% url 'accounts:signup' %}">
         {% csrf_token %}
         <span class="regNameState"></span><br>
-        <input type="text" class="customInput" name="regName" placeholder="아이디를 입력해주세요"><br>
-        <input type="password" class="customInput" name="regPass" placeholder="패스워드를 입력해 주세요"><br>
-        <input type="password" class="customInput" name="chkPass" placeholder="패스워드를 다시 입력해 주세요"><br>
+        <input type="text" class="custom-input" name="regName" placeholder="아이디를 입력해주세요"><br>
+        <input type="password" class="custom-input" name="regPass" placeholder="패스워드를 입력해 주세요"><br>
+        <input type="password" class="custom-input" name="chkPass" placeholder="패스워드를 다시 입력해 주세요"><br>
         <span class="regMailState"></span><br>
-        <input type="email" name="regEmail" class="customInput" placeholder="이메일을 형식에 맞춰 작성해 주세요"><br>
-        <div class="file-input-container">
-            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <span class="profile-text textOrange">프로필 사진</span>
-                <div style="display: flex; flex-direction: row;">
-                    <input type="file" name="regImage" id="regPic" onchange="previewFile()">
-                    <img id="imagePreview">
-                </div>
-            </div>
-        </div>
-        <textarea name="regComment" class="customInput" style="margin-top: 40px;" placeholder="소개글을 작성해 주세요."></textarea>
-        <button type="button" style="width: 300px;" class="btn btn-primary marginTop16" onclick="signupCheck()">회원가입
+        <input type="email" name="regEmail" class="custom-input" placeholder="이메일을 형식에 맞춰 작성해 주세요"><br>
+        <textarea name="regComment" class="custom-input" style="margin-top: 40px;" placeholder="소개글을 작성해 주세요."></textarea>
+        <button type="button" style="width: 300px;" class="btn btn-danger mt-2" onclick="signupCheck()">회원가입
         </button>
     </form>
 

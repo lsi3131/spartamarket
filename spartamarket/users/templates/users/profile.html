@@ -14,7 +14,7 @@
     <div>
         <form action="{% url "users:follow" member.pk %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary">팔로우</button>
+            <button type="submit" class="btn btn-theme-color">팔로우</button>
         </form>
     </div>
 

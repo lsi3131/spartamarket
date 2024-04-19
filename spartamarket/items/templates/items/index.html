@@ -2,30 +2,34 @@
 {% load static %}
 
 {% block content %}
-    <div class="horizontal mb-5">
-        <form action="{% url 'items:register' %}" method="GET">
-            <input type="submit" class="btn btn-primary" value="물건 등록">
-        </form>
+    <div class="d-flex mb-5 justify-content-center">
+        <div class="mx-5">
+            <form action="{% url 'items:register' %}" method="GET">
+                <input type="submit" class="btn btn-danger" value="물건 등록">
+            </form>
+        </div>
 
-        <form method="GET">
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <select name="category" class="form-select" aria-label="" style="width: 120px">
-                        <option value="title" {% if category == 'title' %}selected{% endif %}>제목</option>
-                        <option value="username" {% if category == 'username' %}selected{% endif %}>작성자</option>
-                        <option value="content" {% if category == 'content' %}selected{% endif %}>내용</option>
-                    </select>
+        <div class="mx-5">
+            <form method="GET">
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <select name="category" class="form-select" aria-label="" style="width: 120px">
+                            <option value="title" {% if category == 'title' %}selected{% endif %}>제목</option>
+                            <option value="username" {% if category == 'username' %}selected{% endif %}>작성자</option>
+                            <option value="content" {% if category == 'content' %}selected{% endif %}>내용</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="keyword" value="{{ keyword }}" class="form-control w-100">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-danger" style="padding-left: 28px; padding-right: 28px;">검색</button>
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" name="keyword" value="{{ keyword }}" class="form-control w-100">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary" style="padding-left: 28px; padding-right: 28px;">검색</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
-        <div class="ml-2">
+        <div class="ml-2 mx-5">
             <select id="sort-by-select" class="form-select" aria-label="">
                 <option value="recent" {% if sort == 'recent' %}selected{% endif %}>최신순</option>
                 <option value="click" {% if sort == 'click' %}selected{% endif %}>조회순</option>
@@ -34,6 +38,7 @@
         </div>
     </div>
 
+    <!-- 상품 리스트 -->
     <div class="row row-cols-1 row-cols-md-4 g-4 mx-auto w-75 pb-5">
     {% for item_context in item_context_list %}
         <div class="col">
@@ -51,9 +56,8 @@
                     <div class="horizontal">
                         <p>{{ item_context.item.user }}</p>
                     </div>
-                    <div class="horizontal">
-                        <p>조회수 : {{ item_context.item.click_count }}</p>
-                        <p>좋아요 : {{ item_context.like_count }}</p>
+                    <div class="d-flex justify-content-start">
+                        <p>조회수 : {{ item_context.item.click_count }} ∙ 좋아요 : {{ item_context.like_count }}</p>
                     </div>
 
                 </div>

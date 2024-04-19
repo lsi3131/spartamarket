@@ -5,8 +5,8 @@
     <h1>물건 등록하기</h1>
     <div class="image-register-container d-flex justify-content-start">
         <div class="vertical">
-            <button class="btn btn-primary align-self-start my-2" onclick="addImage()">이미지 등록</button>
-            <button class="btn btn-primary align-self-start" onclick="deleteImage()">이미지 삭제</button>
+            <button class="btn btn-danger align-self-start my-2" onclick="addImage()">이미지 등록</button>
+            <button class="btn btn-danger align-self-start" onclick="deleteImage()">이미지 삭제</button>
         </div>
         <div id="image-row" class="row w-50 mx-2">
             {% for image in images %}
@@ -46,20 +46,33 @@
 
         </form>
 
+        <div class="register-hashtag my-2 d-flex justify-content-start">
+            <label>
+                <input type="text" name="hashtag" placeholder="해시태그 추가">
+            </label>
+            <button class="btn btn-danger mx-1" onclick="addHashTag()">추가</button>
+            <button class="btn btn-danger mx-1" onclick="deleteHashtag()">삭제</button>
+            <div class="mx-3" id="hash-tag">
+            </div>
+        </div>
+
+
         <div class="register-input my-2">
             <input type="hidden" value="{{ id }}" name="id">
-            <button class="btn btn-primary" onclick="doRegister()">등록하기</button>
+            <button class="btn btn-danger" onclick="doRegister()">등록하기</button>
         </div>
     </div>
 
     <script>
         let selectedFileList = []
         let deletedImageIdList = []
+        let hashTagIdList = []
         const csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
         const titleInput = document.querySelector('input[name="title"]');
         const priceInput = document.querySelector('input[name="price"]');
         const contentInput = document.querySelector('textarea[name="content"]');
         const idInput = document.querySelector('input[name="id"]');
+        const hashTagInput = document.querySelector('input[name="hashtag"]');
 
         function addImage() {
             var input = document.createElement('input');
@@ -92,9 +105,9 @@
 
         function deleteImage() {
             let images = document.querySelectorAll(".image-item")
-            for(let img of images) {
+            for (let img of images) {
                 const id = img.getAttribute('id')
-                if(id !== null) {
+                if (id !== null) {
                     deletedImageIdList.push(id)
                 }
             }
@@ -164,9 +177,37 @@
                     }
                 })
                 .catch(error => console.error('Error:', error));
-
         }
 
+        function addHashTag() {
+            const csrfToken = csrfTokenInput.value.trim();
+            let hashTagText = hashTagInput.value.trim()
+
+            fetch('/items/check_hashtag/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    hashtag: hashTagText,
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data['isValid']) {
+                        let divHashTag = document.getElementById('hash-tag')
+                        let spanHashTag = document.createElement('span')
+                        spanHashTag.classList.add('mx-2')
+                        spanHashTag.innerHTML = hashTagText
+
+                        divHashTag.appendChild(spanHashTag)
+                    } else {
+                        console.log('fail to add hashtag')
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
     </script>
 
 

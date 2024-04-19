@@ -1,73 +1,80 @@
 {% extends "base.html" %} {% load static %} {% block content %}
-    <div class="horizontal">
-        <div class="horizontal d-flex justify-content-start">
-            <a class="btn btn-primary" href="{% url 'items:index' %}">목록으로</a>
-            {% if request.user.is_authenticated %}
-                {% if request.user.username == item.user %}
-                    <form action="{% url 'items:update' item.id %}" method="GET">
-                        <input class="btn btn-primary" type="submit" value="수정하기">
-                    </form>
-                    <form action="{% url 'items:delete' item.id %}" method="POST">
+    <style>
+        .detail-index {
+            width: 80%;
+            margin: 20px auto auto;
+        }
+    </style>
+    <div class="detail-index">
+        <div class="horizontal">
+            <div class="horizontal d-flex justify-content-start">
+                <a class="btn btn-danger mx-2" href="{% url 'items:index' %}">목록으로</a>
+                {% if request.user.is_authenticated %}
+                    {% if request.user.username == item.user %}
+                        <form action="{% url 'items:update' item.id %}" method="GET">
+                            <input class="btn btn-danger mx-2" type="submit" value="수정하기">
+                        </form>
+                        <form action="{% url 'items:delete' item.id %}" method="POST">
+                            {% csrf_token %}
+                            <input class="btn btn-danger mx-2" type="submit" value="삭제하기">
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div>
+                {% if item.is_like_on %}
+                    <form action="{% url 'items:like' item.id %}" method="POST">
                         {% csrf_token %}
-                        <input class="btn btn-primary" type="submit" value="삭제하기">
+                        <input class="btn btn-danger" type="submit" value="좋아요 취소">
+                    </form>
+                {% else %}
+                    <form action="{% url 'items:like' item.id %}" method="POST">
+                        {% csrf_token %}
+                        <input class="btn btn-primary" type="submit" value="좋아요">
                     </form>
                 {% endif %}
-            {% endif %}
-        </div>
-        <div>
-            {% if item.is_like_on %}
-                <form action="{% url 'items:like' item.id %}" method="POST">
-                    {% csrf_token %}
-                    <input class="btn btn-primary" type="submit" value="좋아요 취소">
-                </form>
-            {% else %}
-                <form action="{% url 'items:like' item.id %}" method="POST">
-                    {% csrf_token %}
-                    <input class="btn btn-primary" type="submit" value="좋아요">
-                </form>
-            {% endif %}
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        {% for image in item.images %}
-            <div class="col d-flex justify-content-center">
-                <img class="detail-item-image" src="{{ image }}" alt=""/>
             </div>
-        {% endfor %}
-    </div>
-    <hr>
-
-    <div class="d-flex justify-content-start">
-        {% if request.user.image %}
-            <img class="detail-user-image" src="{{ request.user.image.url }}" alt=""/>
-        {% else %}
-            <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
-        {% endif %}
-
-        <div class="mx-5">
-            <h3>{{ item.user }}</h3>
         </div>
-    </div>
-    <hr>
-    <div class="detail-content-container">
-        <div class="detail_title">
-            <h3>{{ item.title }}</h3>
-        </div>
-
-        <div class="detail-price">
-            <h3>{{ item.price }}</h3>
-        </div>
-
-        <div class="detail-content">
-            {{ item.content | linebreaksbr }}
-        </div>
-
         <hr>
-        <div class="detail-category">
-            <span>좋아요 {{ item.like }} ∙ 조회 {{ item.item.click_count }}</span>
+        <div class="row">
+            {% for image in item.images %}
+                <div class="col d-flex justify-content-center">
+                    <img class="detail-item-image" src="{{ image }}" alt=""/>
+                </div>
+            {% endfor %}
         </div>
+        <hr>
 
+        <div class="d-flex justify-content-start align-items-center">
+            {% if request.user.image %}
+                <img class="detail-user-image" src="{{ request.user.image.url }}" alt=""/>
+            {% else %}
+                <img class="detail-user-image" src="{% static "images/default_user.png" %}" alt=""/>
+            {% endif %}
+
+            <div class="mx-2">
+                <h6>{{ item.user }}</h6>
+            </div>
+        </div>
+        <hr>
+        <div class="detail-content-container">
+            <div class="detail_title">
+                <h3>{{ item.title }}</h3>
+            </div>
+
+            <div class="detail-price">
+                <h3>{{ item.price }}</h3>
+            </div>
+
+            <div class="detail-content">
+                {{ item.content | linebreaksbr }}
+            </div>
+
+            <hr>
+            <div class="detail-category">
+                <span>좋아요 {{ item.like }} ∙ 조회 {{ item.item.click_count }}</span>
+            </div>
+        </div>
     </div>
 
 {% endblock content %}
