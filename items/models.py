@@ -38,3 +38,12 @@ class ItemLike(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
     )
+
+
+class HashTag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+
+class TaggedItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="tagged_items")
+    tag = models.ForeignKey(HashTag, on_delete=models.CASCADE, related_name="tagged_items")
